@@ -1,3 +1,5 @@
+// 大きい地図
+
 'use strict';
 
 const { Hono } = require('hono');
@@ -17,6 +19,7 @@ const prisma = new PrismaClient();
 const indexRouter = require('./routes/index');
 const loginRouter = require('./routes/login');
 const logoutRouter = require('./routes/logout');
+const scheduleRouter = require('./routes/schedules');
 
 const app = new Hono();
 
@@ -77,6 +80,7 @@ app.get('/auth/github', async (c) => {
 app.route('/', indexRouter);
 app.route('/login', loginRouter);
 app.route('/logout', logoutRouter);
+app.route('/schedules', scheduleRouter);
 
 // 404 Not Found
 app.notFound((c) => {
