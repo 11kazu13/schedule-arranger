@@ -7,10 +7,17 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "NODE_ENV=\"development\" node --watch src/server.js"
+    "start": "NODE_ENV=\"development\" node --env-file .env --watch src/server.js",
+    "test": "jest --setupFiles dotenv/config"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.2",
-    "hono": "^4.7.10"
+    "@hono/oauth-providers": "0.8.0",
+    "hono": "^4.7.10",
+    "iron-session": "8.0.1"
+  },
+  "devDependencies": {
+    "dotenv": "16.4.5",
+    "jest": "29.7.0"
   }
 }
