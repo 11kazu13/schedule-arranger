@@ -66,5 +66,91 @@ app.post('/', async (c) => {
   return c.redirect('/schedules/' + scheduleId);
 });
 
+app.get('/:scheduleId', async (c) => {
+  const { user } = c.get('session') ?? {};
+  const schedule = await prisma.schedule.findUnique({
+    where: { scheduleId: c.req.param('scheduleId') },
+    include: {
+      user: {
+        select: {
+          userId: true,
+          username: true
+        }
+      }
+    }
+  });
+
+  if (!schedule) {
+    return c.notFound();
+  }
+
+  const candidates = await prisma.candidate.findMany({
+    where: {
+      scheduleId: schedule.scheduleId
+    },
+    orderBy: {
+      candidateId: 'asc'
+    }
+  });
+
+  // DBからその予定に対する全ての出欠を取得する
+  const availabilities = await prisma.availability.findMany({
+    where: { scheduleId: schedule.scheduleId },
+    orderBy: { candidateId: 'asc' },
+    include: {
+      user: {
+        select: {
+          userId: true,
+          username: true
+        }
+      }
+    }
+  });
+  // 出欠 MapMap を作成する
+  const availabilityMapMap = new Map(); // key: userId, value: Map(key: candidateId, value: availability)
+  availabilities.forEach((a) => {
+    const map = availabilityMapMap.get(a.user.userId) || new Map();
+    map.set(a.candidateId, a.availability);
+    availabilityMapMap.set(a.user.userId, map);
+  });
+
+  // TODO 閲覧ユーザーと出欠に紐づくユーザーからユーザーMapを作成する
+
+  console.log(availabilityMapMap); // TODO 除去する
+
+  return c.html(
+    layout(
+      c,
+      `予定: ${schedule.scheduleName}`,
+      html`
+        <h4>【${schedule.scheduleName}】</h4>
+        <p style="white-space: pre;">メモ：${schedule.memo}</p>
+        <p>(Created by ${schedule.user.username}.)</p>
+        <h3>出欠表</h3>
+        <table>
+          <tr>
+            <th>予定</th>
+            ${users.map((user) => html`<th>${user.username}</th>`)}
+          </tr>
+          ${candidates.map(
+            (candidate) => html`
+              <tr>
+                <th>${candidate.candidateName}</th>
+                ${users.map(
+                  (user) => html`
+                    <td>
+                      <button>欠席</button>
+                    </td>
+                  `,
+                )}
+              </tr>
+            `,
+          )}
+        </table>
+      `,
+    ),
+  );
+});
+
 
 module.exports = app;
