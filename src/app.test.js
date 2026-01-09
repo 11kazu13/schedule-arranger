@@ -18,6 +18,9 @@ function mockIronSession() {
 
 // テストで作成したデータを削除
 async function deleteScheduleAggregate(scheduleId) {
+  await prisma.availability.deleteMany({
+    where: {scheduleId}
+  });
   await prisma.candidate.deleteMany({
     where: {scheduleId}
   });
@@ -25,6 +28,7 @@ async function deleteScheduleAggregate(scheduleId) {
     where: {scheduleId}
   });
 }
+
 
 // フォームからリクエストを送信する
 async function sendFormRequest(app, path, body) {
@@ -37,13 +41,13 @@ async function sendFormRequest(app, path, body) {
   });
 }
 
-// JSONを含んだリクエストを送信する
+// JSON を含んだリクエストを送信する
 async function sendJsonRequest(app, path, body) {
   return app.request(path, {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
   });
 }
@@ -95,11 +99,11 @@ describe('/schedules', () => {
 
     const app = require('./app');
 
-   const postRes = await sendFormRequest(app, '/schedules', {
+    const postRes = await sendFormRequest(app, '/schedules', {
       scheduleName: 'テスト予定1',
       memo: 'テストメモ1\r\nテストメモ2',
-      candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3'
-   },);
+      candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3',
+    });
 
     const createdSchedulePath = postRes.headers.get('Location');
     expect(createdSchedulePath).toMatch(/schedules/);
@@ -117,5 +121,58 @@ describe('/schedules', () => {
     expect(body).toMatch(/テスト候補1/);
     expect(body).toMatch(/テスト候補2/);
     expect(body).toMatch(/テスト候補3/);
+  });
+});
+
+
+describe('/schedules/:scheduleId/users/:userId/candidates/:candidateId', () => {
+  let scheduleId = '';
+  beforeAll(() => {
+    mockIronSession();
+  });
+
+  afterAll(async () => {
+    jest.restoreAllMocks();
+    await deleteScheduleAggregate(scheduleId);
+  });
+
+  test('出欠が更新できる', async () => {
+    await prisma.user.upsert({
+      where: { userId: testUser.userId },
+      create: testUser,
+      update: testUser,
+    });
+
+    const app = require('./app');
+
+    const postRes = await sendFormRequest(app, '/schedules', {
+      scheduleName: 'テスト出欠更新予定1',
+      memo: 'テスト出欠更新メモ1',
+      candidates: 'テスト出欠更新候補1',
+    });
+
+    const createdSchedulePath = postRes.headers.get('Location');
+    scheduleId = createdSchedulePath.split('/schedules/')[1];
+
+    const candidate = await prisma.candidate.findFirst({
+      where: { scheduleId },
+    });
+
+    const res = await sendJsonRequest(
+      app,
+      `/schedules/${scheduleId}/users/${testUser.userId}/candidates/${candidate.candidateId}`,
+      {
+        availability: 2,
+      },
+    );
+
+    expect(await res.json()).toEqual({ status: 'OK', availability: 2 });
+
+    const availabilities = await prisma.availability.findMany({
+      where: { scheduleId },
+    });
+
+    expect(availabilities.length).toEqual(1);
+    expect(availabilities[0].availability).toEqual(2);
   });
 });

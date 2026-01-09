@@ -9,9 +9,9 @@ app.post(
   '/:scheduleId/users/:userId/candidates/:candidateId',
   ensureAuthenticated(),
   async (c) => {
-    const scheduleId = c.rep.param('scheduleId');
-    const userId = prseInt(c.rep.param('userId'), 10);
-    const candidateId = prseInt(c.rep.param('candidateId'), 10);
+    const scheduleId = c.req.param('scheduleId');
+    const userId = parseInt(c.req.param('userId'), 10);
+    const candidateId = parseInt(c.req.param('candidateId'), 10);
 
     const body = await c.req.json();
     const availability = body.availability ? parseInt(body.availability, 10) : 0;
@@ -25,13 +25,13 @@ app.post(
 
     await prisma.availability.upsert({
       where: {
-        availabilityCompositId: {
+        availabilityCompositeId: {
           candidateId,
           userId
         }
       },
       create: data,
-      insert: data,
+      update: data,
     });
 
     return c.json({ status: 'OK', availability})
