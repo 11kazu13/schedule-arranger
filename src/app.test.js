@@ -16,6 +16,38 @@ function mockIronSession() {
   });
 }
 
+// テストで作成したデータを削除
+async function deleteScheduleAggregate(scheduleId) {
+  await prisma.candidate.deleteMany({
+    where: {scheduleId}
+  });
+  await prisma.schedule.delete({
+    where: {scheduleId}
+  });
+}
+
+// フォームからリクエストを送信する
+async function sendFormRequest(app, path, body) {
+  return app.request(path, {
+    method: 'POST',
+    body: new URLSearchParams(body),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
+}
+
+// JSONを含んだリクエストを送信する
+async function sendJsonRequest(app, path, body) {
+  return app.request(path, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
+}
+
 describe('/login', () => {
   beforeAll(() => {
     mockIronSession()
@@ -51,8 +83,7 @@ describe('/schedules', () => {
     jest.restoreAllMocks();
 
     // テストで作成したデータを削除
-    await prisma.candidate.deleteMany({ where: { scheduleId } });
-    await prisma.schedule.delete({ where: { scheduleId } });
+    await deleteScheduleAggregate(scheduleId);
   });
 
   test('予定が作成でき、表示される', async () => {
@@ -64,17 +95,11 @@ describe('/schedules', () => {
 
     const app = require('./app');
 
-    const postRes = await app.request('/schedules', {
-      method: 'POST',
-      body: new URLSearchParams({
-        scheduleName: 'テスト予定1',
-        memo: 'テストメモ1\r\nテストメモ2',
-        candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3',
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
+   const postRes = await sendFormRequest(app, '/schedules', {
+      scheduleName: 'テスト予定1',
+      memo: 'テストメモ1\r\nテストメモ2',
+      candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3'
+   },);
 
     const createdSchedulePath = postRes.headers.get('Location');
     expect(createdSchedulePath).toMatch(/schedules/);
