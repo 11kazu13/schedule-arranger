@@ -114,9 +114,32 @@ app.get('/:scheduleId', async (c) => {
     availabilityMapMap.set(a.user.userId, map);
   });
 
-  // TODO 閲覧ユーザーと出欠に紐づくユーザーからユーザーMapを作成する
+  // 閲覧ユーザーと出欠に紐づくユーザーからユーザーMapを作成する
+  const userMap = new Map(); // key: userId, value:User
+  userMap.set(parseInt(user.id, 10), {
+    isSelf: true,
+    userId: parseInt(user.id, 10),
+    username: user.username
+  });
+  availabilities.forEach((a) => {
+    userMap.set(a.user.userId, {
+      isSelf: a.user.userId === parseInt(user.id, 10),
+      userId: a.user.userId,
+      username: a.user.username
+    });
+  });
 
-  console.log(availabilityMapMap); // TODO 除去する
+  // 全ユーザー、全候補でループしてそれぞれの出欠の値がない場合には欠席をセットする
+  const users = Array.from(userMap.values());
+
+  users.forEach((u) => {
+    candidates.forEach((c) => {
+      const map = availabilityMapMap.get(u.userId) || new Map();
+      const a = map.get(c.candidateId) || 0;
+      map.set(c.candidateId, a);
+      availabilityMapMap.set(u.userId, map);
+    });
+  });
 
   return c.html(
     layout(
@@ -136,12 +159,21 @@ app.get('/:scheduleId', async (c) => {
             (candidate) => html`
               <tr>
                 <th>${candidate.candidateName}</th>
-                ${users.map(
-                  (user) => html`
-                    <td>
-                      <button>欠席</button>
-                    </td>
-                  `,
+                ${users.map((user) => {
+                  const availability = availabilityMapMap
+                  .get(user.userId)
+                  .get(candidate.candidateId);
+                  const availabilityLabels = ['×', '?', '⚪︎'];
+                  const label = availabilityLabels[availability];
+                  return html`
+                  <td>
+                    ${user.isSelf
+                      ? html`<button>${label}</button>`
+                      : html`<p>${label}</p>`
+                    }
+                  </td>
+                  `
+                },
                 )}
               </tr>
             `,
