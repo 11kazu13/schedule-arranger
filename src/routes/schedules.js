@@ -141,6 +141,7 @@ app.get('/:scheduleId', async (c) => {
     });
   });
 
+
   return c.html(
     layout(
       c,
