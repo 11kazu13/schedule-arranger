@@ -141,6 +141,15 @@ app.get('/:scheduleId', async (c) => {
     });
   });
 
+  // コメントを取得
+  const comments = await prisma.comment.findMany({
+    where: { scheduleId: schedule.scheduleId }
+  })
+
+  const commentMap = new Map() // key: userId, value: comment
+  comments.forEach((comment) => {
+    commentMap.set(comment.userId, comment.comment);
+  })
 
   return c.html(
     layout(
@@ -164,12 +173,20 @@ app.get('/:scheduleId', async (c) => {
                   const availability = availabilityMapMap
                   .get(user.userId)
                   .get(candidate.candidateId);
-                  const availabilityLabels = ['×', '?', '⚪︎'];
+                  const availabilityLabels = ['❌', '？', '🙆‍♂️'];
                   const label = availabilityLabels[availability];
                   return html`
                   <td>
                     ${user.isSelf
-                      ? html`<button>${label}</button>`
+                      ? html`<button
+                          data-schedule-id="${schedule.scheduleId}"
+                          data-user-id="${user.userId}"
+                          data-candidate-id="${candidate.candidateId}"
+                          data-availability="${availability}"
+                          class="availability-toggle-button"
+                        >
+                        ${label}
+                      </button>`
                       : html`<p>${label}</p>`
                     }
                   </td>
@@ -179,6 +196,18 @@ app.get('/:scheduleId', async (c) => {
               </tr>
             `,
           )}
+          <tr>
+            <th>コメント</th>
+            ${users.map((user) => {
+              const comment = commentMap.get('user.userId');
+              return html`
+                <td>
+                  <p id="${user.isSelf ? "self-comment" : ""}"">${comment}</p>
+                  ${user.isSelf ? html`<button>編集</button>` : ""}
+                </td>
+              `;
+            })}
+          </tr>
         </table>
       `,
     ),

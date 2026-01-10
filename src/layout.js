@@ -10,6 +10,7 @@ function layout(c, title, body) {
       </head>
       <body>
         ${body}
+        <script src="/javascripts/bundle.js"></script>
       </body>
     </html>
   `;
