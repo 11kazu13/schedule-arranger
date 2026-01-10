@@ -6,12 +6,25 @@ const layout = require('../layout');
 const ensureAuthenticated = require('../middlewares/ensure-authenticated');
 const { randomUUID } = require('node:crypto');
 const { PrismaClient } = require('@prisma/client');
-
 const prisma = new PrismaClient({ log: ['query'] });
 
 const app = new Hono();
 
 app.use(ensureAuthenticated());
+
+async function createCandidates(candidateNames, scheduleId) {
+  const candidates = candidateNames.map((candidateName) => ({
+    candidateName,
+    scheduleId
+  }))
+  await prisma.candidate.createMany({
+    data: candidates
+  })
+}
+
+function parseCandidateNames(candidatesStr) {
+  return candidatesStr.split('\n').map((s) => (s.trim())).filter((s) => (s !== ''));
+}
 
 app.get('/new', (c) => {
   return c.html(
@@ -55,12 +68,8 @@ app.post('/', async (c) => {
   });
 
   // 候補日程を登録
-  const candidateNames = body.candidates.split('\n').map((s) => s.trim()).filter((s) => s !== "");
-  const candidates = candidateNames.map((candidateName) => ({
-    candidateName,
-    scheduleId
-  }));
-  await prisma.candidate.createMany({data: candidates});
+  const candidateNames = parseCandidateNames(body.candidates);
+  await createCandidates(candidateNames, scheduleId);
 
   // 作成した予定のページにリダイレクト
   return c.redirect('/schedules/' + scheduleId);
@@ -159,6 +168,12 @@ app.get('/:scheduleId', async (c) => {
         <h4>【${schedule.scheduleName}】</h4>
         <p style="white-space: pre;">メモ：${schedule.memo}</p>
         <p>(Created by ${schedule.user.username}.)</p>
+        ${isMine(user.id, schedule)
+          ? html`
+            <a href="/schedules/${schedule.scheduleId}/edit">この予定を編集する</a>
+          `
+          : ''
+        }
         <h3>出欠表</h3>
         <table>
           <tr>
@@ -222,5 +237,82 @@ app.get('/:scheduleId', async (c) => {
   );
 });
 
+function isMine(userId, schedule) {
+  return schedule && parseInt(schedule.createdBy, 10) === parseInt(userId, 10);
+}
+
+app.get('/:scheduleId/edit', async (c) => {
+  const { user } = c.get('session') || {};
+  const schedule = await prisma.schedule.findUnique({
+    where: { scheduleId: c.req.param('scheduleId') },
+  });
+
+  if (!isMine(user.id, schedule)) {
+    return c.notFound();
+  }
+
+  const candidates = await prisma.candidate.findMany({
+    where: { scheduleId: schedule.scheduleId },
+    orderBy: { candidateId: 'asc' }
+  });
+
+  return c.html(
+    layout(
+      c,
+      `予定の編集: ${schedule.scheduleName}`,
+      html`
+        <form method="post" action="/schedules/${schedule.scheduleId}/update">
+          <div>
+            <h5>予定名</h5>
+            <input type="text" name="scheduleName" value="${schedule.scheduleName}" />
+          </div>
+          <div>
+            <h5>メモ</h5>
+            <textarea name="memo">${schedule.memo}</textarea>
+          </div>
+          <div>
+            <h5>既存の候補日程</h5>
+            <ul>
+              ${candidates.map((candidate) => html`
+                <li>${candidate.candidateName}</li>
+              `)}
+            </ul>
+            <p>候補日程の追加（複数入力する際は改行してください）</p>
+            <textarea name="candidates"></textarea>
+          </div>
+          <button type="submit">編集内容を保存する</button>
+        </form>
+      `
+    )
+  )
+})
+
+app.post('/:scheduleId/update', async (c) => {
+  const { user } = c.get('session') || {};
+  const schedule = await prisma.schedule.findUnique({
+    where: { scheduleId: c.req.param('scheduleId')}
+  });
+
+  if (!isMine(user.id, schedule)) {
+    return c.notFound();
+  }
+
+  const body = await c.req.parseBody();
+  const updatedSchedule = await prisma.schedule.update({
+    where: { scheduleId: schedule.scheduleId },
+    data: {
+      scheduleName: body.scheduleName.slice(0, 255) || '（名称未設定））',
+      memo: body.memo,
+      updatedAt: new Date()
+    }
+  });
+
+  const candidateNames = parseCandidateNames(body.candidates);
+  if (candidateNames.length) {
+    await createCandidates(candidateNames, updatedSchedule.scheduleId);
+  }
+
+  return c.redirect('/schedules/' + updatedSchedule.scheduleId);
+});
 
 module.exports = app;
