@@ -25,3 +25,21 @@ $('.availability-toggle-button').each((i, e) => {
       });
   });
 });
+
+const buttonSelfComment = $('#self-comment-button');
+buttonSelfComment.on('click', () => {
+  const scheduleId = buttonSelfComment.data('schedule-id');
+  const userId = buttonSelfComment.data('user-id');
+  const comment = prompt('コメントを入力してください。');
+  if (comment) {
+    fetch(`/schedules/${scheduleId}/users/${userId}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment: comment })
+    })
+    .then((res) => (res.json()))
+    .then((data) => {
+      $('#self-comment').text(data.comment);
+    });
+  }
+})

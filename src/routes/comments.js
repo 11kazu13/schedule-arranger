@@ -23,7 +23,7 @@ app.post(
 
     await prisma.comment.upsert({
       where: {
-        availabilityCompositeId: {
+        commentCompositeId: {
           scheduleId,
           userId
         }
