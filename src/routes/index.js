@@ -11,7 +11,7 @@ const app = new Hono();
 
 function scheduleTable(schedules) {
   return html`
-    <table>
+    <table class="table">
       <tr>
         <th>予定名</th>
         <th>更新日時</th>
@@ -38,32 +38,29 @@ app.get('/', async (c) => {
   return c.html(
     layout(
       c,
-      '予定調整くん',
+      null,
       html`
-        <h1>どんな予定を作成する？</h1>
+        <div class="my-3">
+          <div class="p-5 bg-light rounded-3">
+            <h1 class="text-body">どんな予定を作成する？</h1>
+            <p class="lead">
+              - GitHubで認証できる、出欠管理アプリ -
+            </p>
+          </div>
+        </div>
         ${user
           ? html`
-            <div>
-              <a href="/logout">${user.login}からログアウト</a>
-            </div>
-            <div>
-              <a href="/schedules/new">予定を作成する</a>
-            </div>
-            ${schedules.length > 0
-              ? html`
-                <h3>予定一覧</h3>
-                ${scheduleTable(schedules)}
-              `
-              : html`
-                <p>まだ予定がないようだ...</p>
-              `
-            }
-            `
-          : html`
-            <div>
-              <a href="/login">ログイン</a>
+            <div class="my-3">
+              <a class="btn btn-primary" href="/schedules/new">予定を作る</a>
+              ${schedules.length > 0
+                ? html`
+                  <h3 class="my-3">あなたの作った予定一覧</h3>
+                  ${scheduleTable(schedules)}
+                `
+                : ''}
             </div>
             `
+          : ''
         }
       `,
     ),

@@ -1,5 +1,8 @@
 'use strict';
 import $ from 'jquery';
+import 'bootstrap/dist/js/bootstrap.min.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 $('.availability-toggle-button').each((i, e) => {
   const button = $(e);
@@ -20,8 +23,10 @@ $('.availability-toggle-button').each((i, e) => {
       .then((response) => response.json())
       .then((data) => {
         button.data('availability', data.availability);
-        const availabilityLabels = ['❌', '？', '🙆‍♂️'];
+        const availabilityLabels = ['欠', '？', '出'];
         button.text(availabilityLabels[data.availability]);
+
+        
       });
   });
 });

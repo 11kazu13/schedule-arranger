@@ -32,20 +32,20 @@ app.get('/new', (c) => {
       c,
       "予定の作成",
       html`
-        <form method="post" action="/schedules">
-          <div>
-            <h5>予定名</h5>
-            <input type="text" name="scheduleName" />
+        <form method="post" action="/schedules" class="my-3">
+          <div class="mb-3">
+            <label class="form-label">予定名</label>
+            <input type="text" name="scheduleName" class="form-control" />
           </div>
-          <div>
-            <h5>メモ</h5>
-            <textarea name="memo"></textarea>
+          <div class="mb-3">
+            <label class="form-label">メモ</label>
+            <textarea name="memo" class="form-control"></textarea>
           </div>
-          <div>
-            <h5>候補日程（改行して複数入力してください）</h5>
-            <textarea name="candidates"></textarea>
+          <div class="mb-3">
+            <label class="form-label">候補日程（改行して複数入力してください）</label>
+            <textarea name="candidates" class="form-control"></textarea>
           </div>
-          <button type="submit">作成する</button>
+          <button class="btn btn-primary type="submit">作成する</button>
         </form>
       `
     )
@@ -160,78 +160,89 @@ app.get('/:scheduleId', async (c) => {
     commentMap.set(comment.userId, comment.comment);
   })
 
+  const buttonStyles = ['btn-danger', 'btn-secondary', 'btn-success'];
+
   return c.html(
     layout(
       c,
       `予定: ${schedule.scheduleName}`,
       html`
-        <h4>【${schedule.scheduleName}】</h4>
-        <p style="white-space: pre;">メモ：${schedule.memo}</p>
-        <p>(Created by ${schedule.user.username}.)</p>
+        <div class="card my-3">
+          <h4 class="card-header">${schedule.scheduleName}</h4>
+          <div class="card-body">
+            <p style="white-space: pre;">${schedule.memo}</p>
+          </div>
+          <div class="card-footer">Created by ${schedule.user.username}.</div>
+        </div>
         ${isMine(user.id, schedule)
           ? html`
-            <a href="/schedules/${schedule.scheduleId}/edit">この予定を編集する</a>
+            <a href="/schedules/${schedule.scheduleId}/edit" class="btn btn-primary">この予定を編集する</a>
           `
           : ''
         }
-        <h3>出欠表</h3>
-        <table>
-          <tr>
-            <th>予定</th>
-            ${users.map((user) => html`<th>${user.username}</th>`)}
-          </tr>
-          ${candidates.map(
-            (candidate) => html`
-              <tr>
-                <th>${candidate.candidateName}</th>
-                ${users.map((user) => {
-                  const availability = availabilityMapMap
-                  .get(user.userId)
-                  .get(candidate.candidateId);
-                  const availabilityLabels = ['❌', '？', '🙆‍♂️'];
-                  const label = availabilityLabels[availability];
-                  return html`
-                  <td>
-                    ${user.isSelf
-                      ? html`<button
-                          data-schedule-id="${schedule.scheduleId}"
-                          data-user-id="${user.userId}"
-                          data-candidate-id="${candidate.candidateId}"
-                          data-availability="${availability}"
-                          class="availability-toggle-button"
-                        >
-                        ${label}
-                      </button>`
-                      : html`<p>${label}</p>`
-                    }
-                  </td>
-                  `
-                },
-                )}
-              </tr>
-            `,
-          )}
-          <tr>
-            <th>コメント</th>
-            ${users.map((user) => {
-              const comment = commentMap.get(user.userId);
-              return html`
-                <td>
-                  <p id="${user.isSelf ? "self-comment" : ""}">${comment}</p>
-                  ${user.isSelf
-                    ? html`
-                    <button
-                      data-schedule-id="${schedule.scheduleId}"
-                      data-user-id="${user.userId}"
-                      id="self-comment-button"
-                    >編集</button>
+        <h3 class="my-3">出欠表</h3>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <tr>
+              <th>予定</th>
+              ${users.map((user) => html`<th>${user.username}</th>`)}
+            </tr>
+            ${candidates.map(
+              (candidate) => html`
+                <tr>
+                  <th>${candidate.candidateName}</th>
+                  ${users.map((user) => {
+                    const availability = availabilityMapMap
+                    .get(user.userId)
+                    .get(candidate.candidateId);
+                    const availabilityLabels = ['欠', '？', '出'];
+                    const label = availabilityLabels[availability];
+                    return html`
+                    <td>
+                      ${user.isSelf
+                        ? html`<button
+                            data-schedule-id="${schedule.scheduleId}"
+                            data-user-id="${user.userId}"
+                            data-candidate-id="${candidate.candidateId}"
+                            data-availability="${availability}"
+                            class="availability-toggle-button btn btn-lg ${buttonStyles[availability]}"
+                          >
+                          ${label}
+                        </button>`
+                        : html`<h3>${label}</h3>`
+                      }
+                    </td>
                     `
-                    : ""}
-                </td>
-              `;
-            })}
-          </tr>
-        </table>
+                  },
+                  )}
+                </tr>
+              `,
+            )}
+            <tr>
+              <th>コメント</th>
+              ${users.map((user) => {
+                const comment = commentMap.get(user.userId);
+                return html`
+                  <td>
+                    <p>
+                      <small id="${user.isSelf ? "self-comment" : ""}">${comment}</small>
+                    <p>
+                    ${user.isSelf
+                      ? html`
+                      <button
+                        data-schedule-id="${schedule.scheduleId}"
+                        data-user-id="${user.userId}"
+                        id="self-comment-button"
+                        class="btn btn-info"
+                      >編集</button>
+                      `
+                      : ""}
+                  </td>
+                `;
+              })}
+            </tr>
+          </table>
+        </div>
       `,
     ),
   );
@@ -261,30 +272,30 @@ app.get('/:scheduleId/edit', async (c) => {
       c,
       `予定の編集: ${schedule.scheduleName}`,
       html`
-        <form method="post" action="/schedules/${schedule.scheduleId}/update">
-          <div>
-            <h5>予定名</h5>
-            <input type="text" name="scheduleName" value="${schedule.scheduleName}" />
+        <form class="my-3" method="post" action="/schedules/${schedule.scheduleId}/update">
+          <div class="mb-3">
+            <label class="form-label">予定名</label>
+            <input type="text" class="form-control" name="scheduleName" value="${schedule.scheduleName}" />
           </div>
-          <div>
-            <h5>メモ</h5>
-            <textarea name="memo">${schedule.memo}</textarea>
+          <div class="mb-3">
+            <label class="form-label">メモ</label>
+            <textarea name="memo" class="form-control">${schedule.memo}</textarea>
           </div>
-          <div>
-            <h5>既存の候補日程</h5>
-            <ul>
+          <div class="mb-3">
+            <label class="form-label">既存の候補日程</label>
+            <ul class="list-group mb-2">
               ${candidates.map((candidate) => html`
-                <li>${candidate.candidateName}</li>
+                <li class="list-group-item">${candidate.candidateName}</li>
               `)}
             </ul>
-            <p>候補日程の追加（複数入力する際は改行してください）</p>
-            <textarea name="candidates"></textarea>
+            <p>追加する候補日程（複数入力する際は改行してください）</p>
+            <textarea name="candidates" class="form-control"></textarea>
           </div>
-          <button type="submit">編集内容を保存する</button>
+          <button type="submit" class="btn btn-primary">編集内容を保存する</button>
         </form>
-        <h3>↓削除後は復元できません↓</h3>
+        <h5 class="my-3">⚠️削除後は復元できません</h5>
         <form method="post" action="/schedules/${schedule.scheduleId}/delete">
-          <button type="submit">この予定を削除する</button>
+          <button type="submit" class="btn btn-danger">この予定を削除する</button>
         </form>
       `
     )
