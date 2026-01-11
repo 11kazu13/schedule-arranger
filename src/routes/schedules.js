@@ -176,7 +176,7 @@ app.get('/:scheduleId', async (c) => {
         </div>
         ${isMine(user.id, schedule)
           ? html`
-            <a href="/schedules/${schedule.scheduleId}/edit" class="btn btn-primary">この予定を編集する</a>
+            <a href="/schedules/${schedule.scheduleId}/edit" class="btn btn-primary">この予定を編集する <i class="bi bi-pencil"></i></a>
           `
           : ''
         }
@@ -291,16 +291,16 @@ app.get('/:scheduleId/edit', async (c) => {
             <p>追加する候補日程（複数入力する際は改行してください）</p>
             <textarea name="candidates" class="form-control"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">編集内容を保存する</button>
+          <button type="submit" class="btn btn-primary">編集内容を保存する <i class="bi bi-pencil"></i></button>
         </form>
         <h5 class="my-3">⚠️削除後は復元できません</h5>
         <form method="post" action="/schedules/${schedule.scheduleId}/delete">
-          <button type="submit" class="btn btn-danger">この予定を削除する</button>
+          <button type="submit" class="btn btn-danger">この予定を削除する <i class="bi bi-trash"></i></button>
         </form>
       `
     )
   )
-})
+});
 
 app.post('/:scheduleId/update', async (c) => {
   const { user } = c.get('session') || {};

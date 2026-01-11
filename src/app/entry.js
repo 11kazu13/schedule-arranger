@@ -26,7 +26,9 @@ $('.availability-toggle-button').each((i, e) => {
         const availabilityLabels = ['欠', '？', '出'];
         button.text(availabilityLabels[data.availability]);
 
-        
+        const buttonStyles = ['btn-danger', 'btn-secondary', 'btn-success'];
+        button.removeClass('btn-danger', 'btn-secondary', 'btn-success');
+        button.addClass(buttonStyles[data.availability]);
       });
   });
 });
