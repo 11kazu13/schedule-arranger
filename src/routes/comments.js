@@ -4,6 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient({ log: ['query'] });
 const { z } = require('zod');
 const { zValidator } = require('@hono/zod-validator');
+const { error } = require('jquery');
 
 const app = new Hono();
 
@@ -40,13 +41,20 @@ const jsonValidator = zValidator(
 
 app.post(
   '/:scheduleId/users/:userId/comments',
+  paramValidator,
+  jsonValidator,
   ensureAuthenticated(),
   async (c) => {
-    const scheduleId = c.req.param('scheduleId');
-    const userId = parseInt(c.req.param('userId'), 10);
+    const { scheduleId, userId } = c.req.valid('param');
+    const { comment } = c.req.valid('json');
 
-    const body = await c.req.json();
-    const comment = body.comment.slice(0, 255);
+    const { user } = c.get('session') ?? {};
+    if (user?.id !== userId) {
+      return c.json({
+        status: 'NG',
+        errors: [{ msg: 'ユーザーIDが不正です'}]
+      }, 403)
+    }
 
     const data = {
       userId,
@@ -54,7 +62,8 @@ app.post(
       comment
     }
 
-    await prisma.comment.upsert({
+    try {
+      await prisma.comment.upsert({
       where: {
         commentCompositeId: {
           scheduleId,
@@ -64,6 +73,13 @@ app.post(
       create: data,
       update: data,
     });
+    } catch (e) {
+      console.error(e);
+      return c.json({
+        status: 'NG',
+        errors: [{ msg: 'DBエラー'　}]
+      }, 500)
+    }
 
     return c.json({ status: 'OK', comment})
   }
