@@ -83,7 +83,7 @@ app.get('/new', (c) => {
 
 app.post('/', scheduleFormValidator, async (c) => {
   const { user } = c.get('session');
-  const body = await c.req.parseBody();
+  const body = c.req.valid('form');
 
   // 予定を登録
   const { scheduleId } = await prisma.schedule.create({
@@ -107,7 +107,7 @@ app.post('/', scheduleFormValidator, async (c) => {
 app.get('/:scheduleId', scheduleIdValidator, async (c) => {
   const { user } = c.get('session') ?? {};
   const schedule = await prisma.schedule.findUnique({
-    where: { scheduleId: c.req.param('scheduleId') },
+    where: { scheduleId: c.req.valid('param').scheduleId },
     include: {
       user: {
         select: {
@@ -284,7 +284,7 @@ function isMine(userId, schedule) {
 app.get('/:scheduleId/edit', scheduleIdValidator, async (c) => {
   const { user } = c.get('session') || {};
   const schedule = await prisma.schedule.findUnique({
-    where: { scheduleId: c.req.param('scheduleId') },
+    where: { scheduleId: c.req.valid('param').scheduleId },
   });
 
   if (!isMine(user.id, schedule)) {
@@ -334,14 +334,14 @@ app.get('/:scheduleId/edit', scheduleIdValidator, async (c) => {
 app.post('/:scheduleId/update', scheduleFormValidator, scheduleIdValidator, async (c) => {
   const { user } = c.get('session') || {};
   const schedule = await prisma.schedule.findUnique({
-    where: { scheduleId: c.req.param('scheduleId')}
+    where: { scheduleId: c.req.valid('param').scheduleId}
   });
 
   if (!isMine(user.id, schedule)) {
     return c.notFound();
   }
 
-  const body = await c.req.parseBody();
+  const body = c.req.valid('form');
   const updatedSchedule = await prisma.schedule.update({
     where: { scheduleId: schedule.scheduleId },
     data: {
@@ -380,7 +380,7 @@ app.deleteScheduleAggregate = deleteScheduleAggregate;
 app.post('/:scheduleId/delete', scheduleIdValidator, async (c) => {
   const { user } = c.get('session') ?? {};
   const schedule = await prisma.schedule.findUnique({
-    where: { scheduleId: c.req.param('scheduleId')}
+    where: { scheduleId: c.req.valid('param').scheduleId }
   });
   if (!isMine(user.id, schedule)) {
     return c.notFound();
