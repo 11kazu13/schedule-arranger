@@ -14,7 +14,7 @@ function layout(c, title, body) {
         <link rel="stylesheet" href="/stylesheets/bundle.css" />
       </head>
       <body>
-        <nav class="navbar navbar-expand-md navbar-dark" style="background-color: var(--panel);">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
           <div class="container-fluid">
             <a class="navbar-brand" href="/">予定調整くん</a>
             <button
