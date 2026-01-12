@@ -62,6 +62,14 @@ app.get('/', async (c) => {
           ? html`
             <div class="my-3">
               <a class="btn btn-primary" href="/schedules/new">予定を作る</a>
+              <a
+                class="btn btn-outline-primary ms-2"
+                href="https://livemate-dpwlxwmjz-kazus-projects-7ab09b50.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                掲示板形式でイベントを募集したい方はこちら
+              </a>
               ${schedules.length > 0
                 ? html`
                   <h3 class="my-3">あなたの作った予定一覧</h3>
