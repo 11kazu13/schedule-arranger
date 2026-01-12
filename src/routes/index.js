@@ -54,7 +54,7 @@ app.get('/', async (c) => {
           <div class="p-5 bg-light rounded-3">
             <h1 class="text-body">さあ、打ち上げだ！</h1>
             <p class="lead">
-              - GitHubで認証できる、出欠管理アプリ -
+              - GitHubで認証できる、スケジュール調整アプリ -
             </p>
           </div>
         </div>
