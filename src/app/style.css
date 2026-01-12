@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+:root {
+  /* 基本の色味 */
+  --bg: #4f22b8;
+  /* ページ全体の背景の色 */
+  --panel: #9240df;
+  /* カードやフォームの色 */
+  --border: #9f7aad;
+  /* 枠線の色 */
+  --text-main: #eae8eb;
+  /* 主要なテキストの色 */
+  --text-sub: #cdcccd;
+  /* 補助的なテキストの色 */
+
+  /* アクセント */
+  --accent: #d563b6;
+  /* 強調したい色 */
+
+  /* UIのルール */
+  --radius: 12px;
+  /* 角丸の大きさ */
+  --radius-lg: 16px;
+  /* 大きめの角丸 */
+  --shadow-soft: 0 10px 30px rgba(201, 201, 201, 0.35);
+}
+
+body {
+  background: radial-gradient(
+      /* グラデーション */
+      1200px 600px at top center,
+      #270f36,
+      var(--bg));
+  color: var(--text-main);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
+}

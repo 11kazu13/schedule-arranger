@@ -2,6 +2,7 @@
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './style.css';
 
 
 $('.availability-toggle-button').each((i, e) => {
@@ -44,9 +45,9 @@ buttonSelfComment.on('click', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ comment: comment })
     })
-    .then((res) => (res.json()))
-    .then((data) => {
-      $('#self-comment').text(data.comment);
-    });
+      .then((res) => (res.json()))
+      .then((data) => {
+        $('#self-comment').text(data.comment);
+      });
   }
 })
