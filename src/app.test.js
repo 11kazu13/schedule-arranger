@@ -81,7 +81,7 @@ describe('/schedules', () => {
     await deleteScheduleAggregate(scheduleId);
   });
 
-  test('イベントが作成でき、表示される', async () => {
+  test('打ち上げが作成でき、表示される', async () => {
     await prisma.user.upsert({
       where: { userId: testUser.userId },
       create: testUser,
@@ -91,7 +91,7 @@ describe('/schedules', () => {
     const app = require('./app');
 
     const postRes = await sendFormRequest(app, '/schedules', {
-      scheduleName: 'テストイベント1',
+      scheduleName: 'テスト打ち上げ1',
       memo: 'テストメモ1\r\nテストメモ2',
       candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3',
     });
@@ -106,7 +106,7 @@ describe('/schedules', () => {
     const body = await res.text();
 
     expect(res.status).toBe(200);
-    expect(body).toMatch(/テストイベント1/);
+    expect(body).toMatch(/テスト打ち上げ1/);
     expect(body).toMatch(/テストメモ1/);
     expect(body).toMatch(/テストメモ2/);
     expect(body).toMatch(/テスト候補1/);
@@ -137,7 +137,7 @@ describe('/schedules/:scheduleId/users/:userId/candidates/:candidateId', () => {
     const app = require('./app');
 
     const postRes = await sendFormRequest(app, '/schedules', {
-      scheduleName: 'テスト出欠更新イベント1',
+      scheduleName: 'テスト出欠更新打ち上げ1',
       memo: 'テスト出欠更新メモ1',
       candidates: 'テスト出欠更新候補1',
     });
@@ -189,7 +189,7 @@ describe('/schedules/:scheduleId/users/:userId/comments', () => {
     const app = require('./app');
 
     const postRes = await sendFormRequest(app, '/schedules', {
-      scheduleName: 'テストコメント更新イベント1',
+      scheduleName: 'テストコメント更新打ち上げ1',
       memo: 'テストコメント更新メモ1',
       candidates: 'テストコメント更新候補1',
     });
@@ -228,7 +228,7 @@ describe('/schedules/:scheduleId/update', () => {
     await deleteScheduleAggregate(scheduleId);
   });
 
-  test('イベントが更新でき、候補が追加できる', async () => {
+  test('打ち上げが更新でき、候補が追加できる', async () => {
     await prisma.user.upsert({
       where: {
         userId: testUser.userId
@@ -243,7 +243,7 @@ describe('/schedules/:scheduleId/update', () => {
       app,
       '/schedules',
       {
-        scheduleName: 'テスト更新イベント1',
+        scheduleName: 'テスト更新打ち上げ1',
         memo: 'テスト更新メモ1',
         candidates: 'テスト更新候補1',
       }
@@ -256,7 +256,7 @@ describe('/schedules/:scheduleId/update', () => {
       app,
       `/schedules/${scheduleId}/update`,
       {
-        scheduleName: 'テスト更新イベント2',
+        scheduleName: 'テスト更新打ち上げ2',
         memo: 'テスト更新メモ2',
         candidates: 'テスト更新候補2',
       }
@@ -266,7 +266,7 @@ describe('/schedules/:scheduleId/update', () => {
       where: { scheduleId }
     });
 
-    expect(schedule.scheduleName).toBe('テスト更新イベント2');
+    expect(schedule.scheduleName).toBe('テスト更新打ち上げ2');
     expect(schedule.memo).toBe('テスト更新メモ2');
 
     const candidates = await prisma.candidate.findMany({
@@ -278,7 +278,7 @@ describe('/schedules/:scheduleId/update', () => {
     expect(candidates[0].candidateName).toBe('テスト更新候補1');
     expect(candidates[1].candidateName).toBe('テスト更新候補2');
   });
-  test('イベント更新時にイベント名が空の場合、デフォルト値が設定される', async () => {
+  test('打ち上げ更新時に打ち上げ名が空の場合、デフォルト値が設定される', async () => {
     await prisma.user.upsert({
       where: { userId: testUser.userId },
       create: testUser,
@@ -288,7 +288,7 @@ describe('/schedules/:scheduleId/update', () => {
     const app = require('./app');
 
     const postRes = await sendFormRequest(app, '/schedules', {
-      scheduleName: 'テスト更新イベント1',
+      scheduleName: 'テスト更新打ち上げ1',
       memo: 'テスト更新メモ1',
       candidates: 'テスト更新候補1',
     });
@@ -296,7 +296,7 @@ describe('/schedules/:scheduleId/update', () => {
     const createdSchedulePath = postRes.headers.get('Location');
     scheduleId = createdSchedulePath.split('/schedules/')[1];
 
-    // 更新時にイベント名を空にする
+    // 更新時に打ち上げ名を空にする
     await sendFormRequest(
       app,
       `/schedules/${scheduleId}/update`,
@@ -325,7 +325,7 @@ describe('/schedules/:scheduleId/delete', () => {
     jest.restoreAllMocks();
   });
 
-  test('イベントに関連するすべての情報が削除できる', async () => {
+  test('打ち上げに関連するすべての情報が削除できる', async () => {
     await prisma.user.upsert({
       where: { userId: testUser.userId },
       create: testUser,
@@ -335,7 +335,7 @@ describe('/schedules/:scheduleId/delete', () => {
     const app = require('./app');
 
     const postRes = await sendFormRequest(app, '/schedules', {
-      scheduleName: 'テスト削除イベント1',
+      scheduleName: 'テスト削除打ち上げ1',
       memo: 'テスト削除メモ1',
       candidates: 'テスト削除候補1',
     });

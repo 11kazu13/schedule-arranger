@@ -59,11 +59,11 @@ app.get('/new', (c) => {
   return c.html(
     layout(
       c,
-      "イベントの作成",
+      "打ち上げの作成",
       html`
         <form method="post" action="/schedules" class="my-3">
           <div class="mb-3">
-            <label class="form-label">イベント名</label>
+            <label class="form-label">打ち上げ名</label>
             <input type="text" name="scheduleName" class="form-control" />
           </div>
           <div class="mb-3">
@@ -85,7 +85,7 @@ app.post('/', scheduleFormValidator, async (c) => {
   const { user } = c.get('session');
   const body = c.req.valid('form');
 
-  // イベントを登録
+  // 打ち上げを登録
   const { scheduleId } = await prisma.schedule.create({
     data: {
       scheduleId: randomUUID(),
@@ -100,7 +100,7 @@ app.post('/', scheduleFormValidator, async (c) => {
   const candidateNames = parseCandidateNames(body.candidates);
   await createCandidates(candidateNames, scheduleId);
 
-  // 作成したイベントのページにリダイレクト
+  // 作成した打ち上げのページにリダイレクト
   return c.redirect('/schedules/' + scheduleId);
 });
 
@@ -131,7 +131,7 @@ app.get('/:scheduleId', scheduleIdValidator, async (c) => {
     }
   });
 
-  // DBからそのイベントに対する全ての出欠を取得する
+  // DBからその打ち上げに対する全ての出欠を取得する
   const availabilities = await prisma.availability.findMany({
     where: { scheduleId: schedule.scheduleId },
     orderBy: { candidateId: 'asc' },
@@ -194,7 +194,7 @@ app.get('/:scheduleId', scheduleIdValidator, async (c) => {
   return c.html(
     layout(
       c,
-      `イベント: ${schedule.scheduleName}`,
+      `打ち上げ: ${schedule.scheduleName}`,
       html`
         <div class="card my-3">
           <h4 class="card-header">${schedule.scheduleName}</h4>
@@ -205,7 +205,7 @@ app.get('/:scheduleId', scheduleIdValidator, async (c) => {
         </div>
         ${isMine(user.id, schedule)
           ? html`
-            <a href="/schedules/${schedule.scheduleId}/edit" class="btn btn-primary">このイベントを編集する <i class="bi bi-pencil"></i></a>
+            <a href="/schedules/${schedule.scheduleId}/edit" class="btn btn-primary">編集する <i class="bi bi-pencil"></i></a>
           `
           : ''
         }
@@ -213,7 +213,7 @@ app.get('/:scheduleId', scheduleIdValidator, async (c) => {
         <div class="table-responsive">
           <table class="table table-bordered">
             <tr>
-              <th>イベント</th>
+              <th>名前</th>
               ${users.map((user) => html`<th>${user.username}</th>`)}
             </tr>
             ${candidates.map(
@@ -299,11 +299,11 @@ app.get('/:scheduleId/edit', scheduleIdValidator, async (c) => {
   return c.html(
     layout(
       c,
-      `イベントの編集: ${schedule.scheduleName}`,
+      `打ち上げの編集: ${schedule.scheduleName}`,
       html`
         <form class="my-3" method="post" action="/schedules/${schedule.scheduleId}/update">
           <div class="mb-3">
-            <label class="form-label">イベント名</label>
+            <label class="form-label">打ち上げ名</label>
             <input type="text" class="form-control" name="scheduleName" value="${schedule.scheduleName}" />
           </div>
           <div class="mb-3">
@@ -320,11 +320,11 @@ app.get('/:scheduleId/edit', scheduleIdValidator, async (c) => {
             <p>追加する候補日程（複数入力する際は改行してください）</p>
             <textarea name="candidates" class="form-control"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">編集内容を保存する <i class="bi bi-pencil"></i></button>
+          <button type="submit" class="btn btn-primary">保存する <i class="bi bi-pencil"></i></button>
         </form>
         <h5 class="my-3">⚠️削除後は復元できません</h5>
         <form method="post" action="/schedules/${schedule.scheduleId}/delete">
-          <button type="submit" class="btn btn-danger">このイベントを削除する <i class="bi bi-trash"></i></button>
+          <button type="submit" class="btn btn-danger">削除する <i class="bi bi-trash"></i></button>
         </form>
       `
     )

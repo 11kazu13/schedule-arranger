@@ -19,7 +19,7 @@ function scheduleTable(schedules) {
   return html`
     <table class="table">
       <tr>
-        <th>イベント名</th>
+        <th>名前</th>
         <th>更新日時</th>
       </tr>
       ${schedules.map((schedule) => html`
@@ -52,7 +52,7 @@ app.get('/', async (c) => {
       html`
         <div class="my-3">
           <div class="p-5 bg-light rounded-3">
-            <h1 class="text-body">どんなイベントを作成する？</h1>
+            <h1 class="text-body">さあ、打ち上げだ！</h1>
             <p class="lead">
               - GitHubで認証できる、出欠管理アプリ -
             </p>
@@ -61,18 +61,18 @@ app.get('/', async (c) => {
         ${user
           ? html`
             <div class="my-3">
-              <a class="btn btn-primary" href="/schedules/new">イベントを作る</a>
+              <a class="btn btn-primary" href="/schedules/new">新規作成</a>
               <a
                 class="btn btn-outline-primary ms-2"
                 href="https://livemate.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                掲示板形式でイベントを募集したい方はこちら
+                一緒にライブに行く仲間を見つけたい方はこちら
               </a>
               ${schedules.length > 0
                 ? html`
-                  <h3 class="my-3">あなたの作ったイベント一覧</h3>
+                  <h3 class="my-3">一覧</h3>
                   ${scheduleTable(schedules)}
                 `
                 : ''}
