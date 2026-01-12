@@ -4,7 +4,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient({ log: ['query'] });
 const { z } = require('zod');
 const { zValidator } = require('@hono/zod-validator');
-const { error } = require('jquery');
 
 const app = new Hono();
 
@@ -77,7 +76,7 @@ app.post(
       console.error(e);
       return c.json({
         status: 'NG',
-        errors: [{ msg: 'DBエラー'　}]
+        errors: [{ msg: 'DBエラー' }]
       }, 500)
     }
 

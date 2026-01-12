@@ -60,7 +60,7 @@ describe('/login', () => {
     expect(res.status).toBe(200);
   });
 
-  test('ログイン時はユーザ名が表示される', async() => {
+  test('ログイン時はユーザ名が表示される', async () => {
     const app = require('./app.js');
     const res = await app.request('/login');
     expect(await res.text()).toMatch(/testuser/);
@@ -278,7 +278,43 @@ describe('/schedules/:scheduleId/update', () => {
     expect(candidates[0].candidateName).toBe('テスト更新候補1');
     expect(candidates[1].candidateName).toBe('テスト更新候補2');
   });
+  test('予定更新時に予定名が空の場合、デフォルト値が設定される', async () => {
+    await prisma.user.upsert({
+      where: { userId: testUser.userId },
+      create: testUser,
+      update: testUser,
+    });
+
+    const app = require('./app');
+
+    const postRes = await sendFormRequest(app, '/schedules', {
+      scheduleName: 'テスト更新予定1',
+      memo: 'テスト更新メモ1',
+      candidates: 'テスト更新候補1',
+    });
+
+    const createdSchedulePath = postRes.headers.get('Location');
+    scheduleId = createdSchedulePath.split('/schedules/')[1];
+
+    // 更新時に予定名を空にする
+    await sendFormRequest(
+      app,
+      `/schedules/${scheduleId}/update`,
+      {
+        scheduleName: '',
+        memo: 'テスト更新メモ2',
+        candidates: 'テスト更新候補2',
+      }
+    );
+
+    const schedule = await prisma.schedule.findUnique({
+      where: { scheduleId }
+    });
+
+    expect(schedule.scheduleName).toBe('（名称未設定）');
+  });
 });
+
 
 describe('/schedules/:scheduleId/delete', () => {
   beforeAll(() => {

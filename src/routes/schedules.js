@@ -36,7 +36,7 @@ const scheduleFormValidator = zValidator(
   }),
   (result) => {
     if (!result.success) {
-      throw new HTTPException(400, { message: '入力された情報が不十分、または正しくありません'})
+      throw new HTTPException(400, { message: '入力された情報が不十分、または正しくありません' })
     }
   }
 );
@@ -217,19 +217,19 @@ app.get('/:scheduleId', scheduleIdValidator, async (c) => {
               ${users.map((user) => html`<th>${user.username}</th>`)}
             </tr>
             ${candidates.map(
-              (candidate) => html`
+          (candidate) => html`
                 <tr>
                   <th>${candidate.candidateName}</th>
                   ${users.map((user) => {
-                    const availability = availabilityMapMap
-                    .get(user.userId)
-                    .get(candidate.candidateId);
-                    const availabilityLabels = ['欠', '？', '出'];
-                    const label = availabilityLabels[availability];
-                    return html`
+            const availability = availabilityMapMap
+              .get(user.userId)
+              .get(candidate.candidateId);
+            const availabilityLabels = ['欠', '？', '出'];
+            const label = availabilityLabels[availability];
+            return html`
                     <td>
                       ${user.isSelf
-                        ? html`<button
+                ? html`<button
                             data-schedule-id="${schedule.scheduleId}"
                             data-user-id="${user.userId}"
                             data-candidate-id="${candidate.candidateId}"
@@ -238,26 +238,26 @@ app.get('/:scheduleId', scheduleIdValidator, async (c) => {
                           >
                           ${label}
                         </button>`
-                        : html`<h3>${label}</h3>`
-                      }
+                : html`<h3>${label}</h3>`
+              }
                     </td>
                     `
-                  },
-                  )}
+          },
+          )}
                 </tr>
               `,
-            )}
+        )}
             <tr>
               <th>コメント</th>
               ${users.map((user) => {
-                const comment = commentMap.get(user.userId);
-                return html`
+          const comment = commentMap.get(user.userId);
+          return html`
                   <td>
                     <p>
                       <small id="${user.isSelf ? "self-comment" : ""}">${comment}</small>
                     <p>
                     ${user.isSelf
-                      ? html`
+              ? html`
                       <button
                         data-schedule-id="${schedule.scheduleId}"
                         data-user-id="${user.userId}"
@@ -265,10 +265,10 @@ app.get('/:scheduleId', scheduleIdValidator, async (c) => {
                         class="btn btn-info"
                       >編集</button>
                       `
-                      : ""}
+              : ""}
                   </td>
                 `;
-              })}
+        })}
             </tr>
           </table>
         </div>
@@ -334,7 +334,7 @@ app.get('/:scheduleId/edit', scheduleIdValidator, async (c) => {
 app.post('/:scheduleId/update', scheduleFormValidator, scheduleIdValidator, async (c) => {
   const { user } = c.get('session') || {};
   const schedule = await prisma.schedule.findUnique({
-    where: { scheduleId: c.req.valid('param').scheduleId}
+    where: { scheduleId: c.req.valid('param').scheduleId }
   });
 
   if (!isMine(user.id, schedule)) {
@@ -345,7 +345,7 @@ app.post('/:scheduleId/update', scheduleFormValidator, scheduleIdValidator, asyn
   const updatedSchedule = await prisma.schedule.update({
     where: { scheduleId: schedule.scheduleId },
     data: {
-      scheduleName: body.scheduleName.slice(0, 255) || '（名称未設定））',
+      scheduleName: body.scheduleName.slice(0, 255) || '（名称未設定）',
       memo: body.memo,
       updatedAt: new Date()
     }
@@ -362,16 +362,16 @@ app.post('/:scheduleId/update', scheduleFormValidator, scheduleIdValidator, asyn
 
 async function deleteScheduleAggregate(scheduleId) {
   await prisma.availability.deleteMany({
-    where: {scheduleId}
+    where: { scheduleId }
   });
   await prisma.candidate.deleteMany({
-    where: {scheduleId}
+    where: { scheduleId }
   });
   await prisma.comment.deleteMany({
-    where: {scheduleId}
+    where: { scheduleId }
   });
   await prisma.schedule.delete({
-    where: {scheduleId}
+    where: { scheduleId }
   });
 }
 
