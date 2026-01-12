@@ -12,7 +12,7 @@ const paramValidator = zValidator(
   z.object({
     scheduleId: z.string().uuid(),
     userId: z.coerce.number().int().min(0),
-    candidateId: z.number().int().min(0)
+    candidateId: z.coerce.number().int().min(0)
   }),
   (result, c) => {
     if (!result.success) {
@@ -52,7 +52,7 @@ app.post(
     if (user?.id !== userId) {
       return c.json({
         status: 'NG',
-        errors: [{ msg: 'ユーザーIDが不正です'}]
+        errors: [{ msg: 'ユーザーIDが不正です' }]
       }, 403);
     }
 
@@ -78,11 +78,11 @@ app.post(
       console.error(e);
       return c.json({
         status: 'NG',
-        errors: [{ msg: 'DBエラー'}]
+        errors: [{ msg: 'DBエラー' }]
       }, 500);
     }
 
-    return c.json({ status: 'OK', availability})
+    return c.json({ status: 'OK', availability })
   }
 );
 

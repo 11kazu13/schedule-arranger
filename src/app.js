@@ -9,6 +9,7 @@ const { html } = require('hono/html');
 const { HTTPException } = require('hono/http-exception');
 const { secureHeaders } = require('hono/secure-headers');
 const { env } = require('hono/adapter');
+const { getCookie, deleteCookie } = require('hono/cookie');
 const { serveStatic } = require('@hono/node-server/serve-static');
 const { trimTrailingSlash } = require('hono/trailing-slash');
 const { githubAuth } = require('@hono/oauth-providers/github');
@@ -85,7 +86,14 @@ app.get('/auth/github', async (c) => {
     create: data,
   });
 
-  return c.redirect('/');
+  const loginFrom = getCookie(c, 'loginFrom')
+  // オープンリダイレクタの脆弱性対策
+  if (loginFrom && /^\/(?!\/)[\w\-./?=&%+#:]*$/.test(loginFrom)) {
+    deleteCookie(c, 'loginFrom');
+    return c.redirect(loginFrom);
+  } else {
+    return c.redirect('/')
+  }
 });
 
 // ルーティング
