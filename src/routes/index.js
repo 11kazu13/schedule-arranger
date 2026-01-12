@@ -64,7 +64,7 @@ app.get('/', async (c) => {
               <a class="btn btn-primary" href="/schedules/new">イベントを作る</a>
               <a
                 class="btn btn-outline-primary ms-2"
-                href="https://livemate-dpwlxwmjz-kazus-projects-7ab09b50.vercel.app/"
+                href="https://livemate.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
