@@ -13,7 +13,7 @@ const { HTTPException } = require('hono/http-exception');
 
 const app = new Hono();
 
-app.use(ensureAuthenticated());
+app.use(ensureAuthenticated()); // ログインしていなければ弾く
 
 const scheduleIdValidator = zValidator(
   'param',
