@@ -1,3 +1,5 @@
+// クライアントサイドのJSで非同期通信
+
 'use strict';
 import $ from 'jquery';
 import 'bootstrap/dist/js/bootstrap.min.js';
