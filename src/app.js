@@ -18,12 +18,12 @@ const { PrismaClient } = require('@prisma/client');
 const layout = require('./layout');
 
 const prisma = new PrismaClient();
-const indexRouter = require('./routes/index');
-const loginRouter = require('./routes/login');
-const logoutRouter = require('./routes/logout');
-const scheduleRouter = require('./routes/schedules');
-const availabilitiesRouter = require('./routes/availabilities');
-const commentsRouter = require('./routes/comments');
+const indexRouter = require('./routes/index.js');
+const loginRouter = require('./routes/login.js');
+const logoutRouter = require('./routes/logout.js');
+const scheduleRouter = require('./routes/schedules.js');
+const availabilitiesRouter = require('./routes/availabilities.js');
+const commentsRouter = require('./routes/comments.js');
 
 const app = new Hono();
 
