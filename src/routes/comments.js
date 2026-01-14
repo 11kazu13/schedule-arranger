@@ -26,7 +26,7 @@ const paramValidator = zValidator(
 const jsonValidator = zValidator(
   'json',
   z.object({
-    comment: z.string().min(0).max(255)
+    comment: z.string().min(1).max(255)
   }),
   (result, c) => {
     if (!result.success) {
