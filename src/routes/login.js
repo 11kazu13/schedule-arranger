@@ -6,9 +6,9 @@ const { setCookie } = require('hono/cookie');
 const app = new Hono();
 
 app.get('/', (c) => {
-  const from = c.req.query('from');
+  const from = c.req.query('from'); // 例：/login?from=/schedules/123
   if (from) {
-    setCookie(c, 'loginFrom', from, { maxAge: 1000 * 60 * 7 });
+    setCookie(c, 'loginFrom', from, { maxAge: 1000 * 60 * 7 }); // ログインが完了したら元のリンクに戻すために保存をする仕組み
   }
   return c.html(
     layout(
