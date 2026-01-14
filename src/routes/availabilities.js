@@ -1,3 +1,5 @@
+// ログイン中の本人がある予定の特定の候補日に対して出欠を登録するAPI
+
 const { Hono } = require('hono');
 const ensureAuthenticated = require('../middlewares/ensure-authenticated');
 const { PrismaClient } = require('@prisma/client');
@@ -66,7 +68,7 @@ app.post(
     try {
       await prisma.availability.upsert({
         where: {
-          availabilityCompositeId: {
+          availabilityCompositeId: { // 複合主キー
             candidateId,
             userId
           }
